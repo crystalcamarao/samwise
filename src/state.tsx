@@ -15,17 +15,28 @@ export interface Settings {
   date: string;
 }
 
+/** Everything Processing produces for the Result screen. */
+export interface SessionResult {
+  /** Composited color frame as a PNG data URL. */
+  frameUrl: string;
+  /** 1-bit thermal preview as a PNG data URL. */
+  thermalUrl: string;
+  /** Black/white pixels for the printer. */
+  thermalImage: ImageData;
+  /** Guest download URL for the QR (LAN now; cloud in step 9), or null. */
+  shareUrl: string | null;
+}
+
 interface AppState {
   screen: ScreenName;
   layoutId: LayoutId | null;
   photos: CapturedPhoto[];
-  /** Composited color frame as a data URL, produced by Processing. */
-  frameUrl: string | null;
+  result: SessionResult | null;
   settings: Settings;
   go: (screen: ScreenName) => void;
   chooseLayout: (id: LayoutId) => void;
   setPhotos: (photos: CapturedPhoto[]) => void;
-  setFrameUrl: (url: string | null) => void;
+  setResult: (result: SessionResult | null) => void;
   /** Reset the per-guest flow back to the attract screen. */
   reset: () => void;
 }
@@ -44,7 +55,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [screen, setScreen] = useState<ScreenName>("attract");
   const [layoutId, setLayoutId] = useState<LayoutId | null>(null);
   const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
-  const [frameUrl, setFrameUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<SessionResult | null>(null);
   const [settings] = useState<Settings>({
     eventName: "Our Celebration",
     date: defaultDate(),
@@ -61,7 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(() => {
     setLayoutId(null);
     setPhotos([]);
-    setFrameUrl(null);
+    setResult(null);
     setScreen("attract");
   }, []);
 
@@ -70,15 +81,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       screen,
       layoutId,
       photos,
-      frameUrl,
+      result,
       settings,
       go,
       chooseLayout,
       setPhotos,
-      setFrameUrl,
+      setResult,
       reset,
     }),
-    [screen, layoutId, photos, frameUrl, settings, go, chooseLayout, reset],
+    [screen, layoutId, photos, result, settings, go, chooseLayout, reset],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

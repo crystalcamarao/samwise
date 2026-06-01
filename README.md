@@ -5,10 +5,14 @@ shots, print a 58mm thermal receipt (MXW01) and get a QR to download a color
 frame + MP4. See [`PLAN.md`](./PLAN.md) for the full design and roadmap.
 
 ## Status
-Steps 1–4 of the plan are in place: app scaffold + screen flow, Attract /
-Welcome / Choose-Layout screens, front-camera capture (countdown, multi-shot,
-retake, screen-flash), and the color frame compositor. Printing, MP4 encoding,
-the local server, cloud sync, and the admin panel are next.
+Steps 1–7 of the plan are in place: app scaffold + screen flow; Attract /
+Welcome / Choose-Layout screens; front-camera capture (countdown, multi-shot,
+retake, screen-flash); color frame compositor; MP4 encoding (WebCodecs → MP4
+with a WebM fallback); the Termux Node server (kiosk-only upload, LAN download
+page); and the Result screen (download QR + thermal print preview, copies,
+reprint). Real MXW01 Bluetooth printing (currently mocked), Cloudflare cloud
+sync, and the admin panel are next. See [`server/SETUP.md`](./server/SETUP.md)
+for tablet setup.
 
 ## Develop
 ```bash

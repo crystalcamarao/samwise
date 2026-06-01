@@ -1,49 +1,81 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { renderFrame } from "../lib/compositor";
+import { renderThermal } from "../lib/thermal";
+import { encodeSlideshow } from "../lib/video";
+import { uploadSession } from "../lib/upload";
 import { DEFAULT_THEME } from "../config/templates";
 import { getLayout } from "../config/layouts";
 import { useApp } from "../state";
 
 /**
- * Composites the captured photos into the color frame, then advances to the
- * result. (Step 5 adds MP4 encoding; step 9 adds the cloud upload here.)
+ * Pipeline for one session: composite the color frame, render the thermal
+ * version, encode the MP4, and upload (best-effort) to get the share URL.
  */
 export function Processing() {
-  const { layoutId, photos, settings, setFrameUrl, go, reset } = useApp();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { layoutId, photos, settings, setResult, go, reset } = useApp();
+  const ran = useRef(false);
+  const [status, setStatus] = useState("Building your photo…");
 
   useEffect(() => {
-    if (!layoutId) {
+    if (ran.current) return; // guard StrictMode double-invoke
+    ran.current = true;
+
+    if (!layoutId || photos.length === 0) {
       reset();
       return;
     }
-    const canvas = canvasRef.current ?? document.createElement("canvas");
-    canvas.width = 1080;
-    try {
-      renderFrame(
-        canvas,
-        photos.map((p) => ({
+
+    (async () => {
+      try {
+        const sources = photos.map((p) => ({
           source: p.canvas,
           width: p.width,
           height: p.height,
-        })),
-        getLayout(layoutId),
-        DEFAULT_THEME,
-        { eventName: settings.eventName, date: settings.date },
-      );
-      setFrameUrl(canvas.toDataURL("image/png"));
-      const t = window.setTimeout(() => go("result"), 600);
-      return () => window.clearTimeout(t);
-    } catch {
-      reset();
-    }
-  }, [layoutId, photos, settings, setFrameUrl, go, reset]);
+        }));
+
+        const frameCanvas = document.createElement("canvas");
+        frameCanvas.width = 1080;
+        renderFrame(frameCanvas, sources, getLayout(layoutId), DEFAULT_THEME, {
+          eventName: settings.eventName,
+          date: settings.date,
+        });
+        const frameUrl = frameCanvas.toDataURL("image/png");
+
+        const thermal = renderThermal(
+          frameCanvas,
+          frameCanvas.width,
+          frameCanvas.height,
+        );
+        const thermalUrl = thermal.canvas.toDataURL("image/png");
+
+        setStatus("Creating your video…");
+        let video = null;
+        try {
+          video = await encodeSlideshow(sources);
+        } catch {
+          video = null; // print + photo still work without it
+        }
+
+        setStatus("Saving…");
+        const uploaded = await uploadSession(frameUrl, video, settings.eventName);
+
+        setResult({
+          frameUrl,
+          thermalUrl,
+          thermalImage: thermal.imageData,
+          shareUrl: uploaded?.lanUrl ?? uploaded?.url ?? null,
+        });
+        go("result");
+      } catch {
+        reset();
+      }
+    })();
+  }, [layoutId, photos, settings, setResult, go, reset]);
 
   return (
     <div className="screen processing">
-      <canvas ref={canvasRef} className="hidden-canvas" />
       <div className="spinner" />
-      <p>Building your photo…</p>
+      <p>{status}</p>
     </div>
   );
 }

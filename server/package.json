@@ -1,0 +1,10 @@
+{
+  "name": "receipt-photobooth-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Tablet-side server (Termux): serves the app, stores sessions, serves LAN downloads. Zero dependencies.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

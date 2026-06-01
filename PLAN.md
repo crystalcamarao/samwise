@@ -101,5 +101,13 @@ tests/     compositor geometry, layout×template snapshots
 12. Tests + SessionStart hook + SETUP.md
 
 ## Status
-- [ ] Steps 1–4 (this pass): scaffold, screens, camera, compositor
-- [ ] Steps 5–12
+- [x] Steps 1–4: scaffold, screens, camera, compositor
+- [x] Step 5: MP4 encoder (WebCodecs → MP4, MediaRecorder → WebM fallback)
+- [x] Step 6: Termux Node server (kiosk-only upload, LAN download page, streaming)
+- [x] Step 7: Result screen (QR + print preview / reprint / copies)
+- [~] Step 8: thermal 1-bit render + Atkinson dithering done; **real MXW01 BLE
+  client still pending** (currently a mock printer)
+- [ ] Step 9: Cloudflare Worker + R2, background sync, adaptive online/offline QR
+- [ ] Step 10: Admin panel
+- [ ] Step 11: kiosk hardening (auto-start wiring, memory, Web Worker encode)
+- [ ] Step 12: more tests + SessionStart hook
