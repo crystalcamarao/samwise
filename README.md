@@ -14,8 +14,9 @@ page); Cloudflare Worker + R2 cloud sync with a retry queue and adaptive QR; the
 Result screen (adaptive download QR + thermal print preview, copies, reprint);
 and a hidden admin panel (event/theme/logo, camera, print intensity/contrast,
 test print, cloud status + sync, storage + purge, config import/export).
-Remaining: kiosk hardening (step 11) and more tests + a SessionStart hook
-(step 12). See [`server/SETUP.md`](./server/SETUP.md) for tablet setup and
+kiosk hardening (wake lock, idle auto-reset, periodic reload, Web Worker
+encoding); and a test suite + a SessionStart hook. All 12 plan steps are now
+implemented. See [`server/SETUP.md`](./server/SETUP.md) for tablet setup and
 [`worker/README.md`](./worker/README.md) for cloud deploy.
 
 Open the admin panel by long-pressing the logo on the Welcome screen (PIN

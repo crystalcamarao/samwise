@@ -44,7 +44,7 @@ export function renderThermal(
     gray[i] = v;
   }
 
-  atkinson(gray, width, height);
+  atkinsonDither(gray, width, height);
 
   for (let i = 0; i < width * height; i++) {
     const v = gray[i];
@@ -81,7 +81,7 @@ export function buildTestImage(label: string, contrast = 1.15): ThermalResult {
 }
 
 /** In-place Atkinson dither: snaps to 0/255 and diffuses 1/8 of the error. */
-function atkinson(gray: Float32Array, w: number, h: number): void {
+export function atkinsonDither(gray: Float32Array, w: number, h: number): void {
   const at = (x: number, y: number, e: number) => {
     if (x < 0 || x >= w || y < 0 || y >= h) return;
     gray[y * w + x] += (e * 1) / 8;

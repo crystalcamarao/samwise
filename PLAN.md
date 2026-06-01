@@ -118,4 +118,6 @@ tests/     compositor geometry, layout×template snapshots
 - [x] Step 11: kiosk hardening — screen wake lock (re-acquire on visibility),
   idle auto-reset to attract, periodic reload to flush memory, MP4 encoding
   moved to a Web Worker; auto-start scripts + screen-pinning/hotspot docs
-- [ ] Step 12: more tests + SessionStart hook
+- [x] Step 12: tests for compositor geometry, Atkinson dithering, settings
+  merge, and template text (16 tests); SessionStart hook installs deps so
+  lint/tests run in Claude Code on the web
