@@ -115,5 +115,7 @@ tests/     compositor geometry, layout×template snapshots
   reconnect, cloud status + Sync now, storage used/free + warn threshold +
   purge-all, config import/export; server `/api/storage` `/api/sessions`
   `/api/purge`
-- [ ] Step 11: kiosk hardening (auto-start wiring, memory, Web Worker encode)
+- [x] Step 11: kiosk hardening — screen wake lock (re-acquire on visibility),
+  idle auto-reset to attract, periodic reload to flush memory, MP4 encoding
+  moved to a Web Worker; auto-start scripts + screen-pinning/hotspot docs
 - [ ] Step 12: more tests + SessionStart hook

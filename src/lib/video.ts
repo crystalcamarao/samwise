@@ -30,6 +30,68 @@ interface EncodeOpts {
 
 const DEFAULTS: EncodeOpts = { width: 640, height: 480, fps: 15, holdMs: 1200 };
 
+/**
+ * Preferred entry point. Encodes in a Web Worker (off the main thread) when
+ * WebCodecs + OffscreenCanvas are available, falling back to main-thread
+ * encoding (which itself falls back to WebM) otherwise.
+ */
+export async function encodeSlideshowSmart(
+  photos: PhotoSource[],
+  partial?: Partial<EncodeOpts>,
+): Promise<VideoResult> {
+  const opts = { ...DEFAULTS, ...partial };
+  const canUseWorker =
+    typeof Worker !== "undefined" &&
+    typeof OffscreenCanvas !== "undefined" &&
+    typeof (globalThis as any).VideoEncoder !== "undefined";
+  if (canUseWorker) {
+    try {
+      return await encodeInWorker(photos, opts);
+    } catch {
+      // Fall through to main-thread encoding.
+    }
+  }
+  return encodeSlideshow(photos, partial);
+}
+
+async function encodeInWorker(
+  photos: PhotoSource[],
+  opts: EncodeOpts,
+): Promise<VideoResult> {
+  const bitmaps = await Promise.all(
+    photos.map((p) => createImageBitmap(p.source as ImageBitmapSource)),
+  );
+  const worker = new Worker(new URL("./video-worker.ts", import.meta.url), {
+    type: "module",
+  });
+  try {
+    const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+      worker.onmessage = (e: MessageEvent) =>
+        e.data?.ok
+          ? resolve(e.data.buffer)
+          : reject(new Error(e.data?.error || "worker failed"));
+      worker.onerror = () => reject(new Error("worker error"));
+      worker.postMessage(
+        {
+          bitmaps,
+          width: opts.width,
+          height: opts.height,
+          fps: opts.fps,
+          holdMs: opts.holdMs,
+        },
+        bitmaps,
+      );
+    });
+    return {
+      blob: new Blob([buffer], { type: "video/mp4" }),
+      ext: "mp4",
+      mimeType: "video/mp4",
+    };
+  } finally {
+    worker.terminate();
+  }
+}
+
 export async function encodeSlideshow(
   photos: PhotoSource[],
   partial?: Partial<EncodeOpts>,

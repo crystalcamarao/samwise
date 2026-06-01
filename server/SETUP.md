@@ -45,6 +45,16 @@ chmod +x ~/.termux/boot/termux-boot.sh ~/photobooth/server/scripts/start.sh
   the on-screen "Save now" QR points to the tablet's LAN IP (e.g.
   `http://192.168.43.1:8080/s/<id>`). The download still works with zero internet.
 
+## Kiosk behavior (automatic)
+The app handles these itself once open in Chrome:
+- **Screen wake lock** — holds the screen on, re-acquired after any interruption.
+- **Idle auto-reset** — returns to the attract screen after ~90s of inactivity
+  on the welcome/layout/result screens, ready for the next guest.
+- **Periodic reload** — reloads on the attract screen after ~40 sessions to
+  flush memory for all-day stability.
+- **Off-thread video encoding** — MP4 is encoded in a Web Worker so the UI stays
+  responsive.
+
 ## Operator checklist
 - [ ] Tablet plugged in
 - [ ] Paper loaded in the printer, printer charged & paired

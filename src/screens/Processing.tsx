@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { renderFrame } from "../lib/compositor";
 import { renderThermal } from "../lib/thermal";
-import { encodeSlideshow } from "../lib/video";
+import { encodeSlideshowSmart } from "../lib/video";
 import { uploadSession } from "../lib/upload";
 import { getTheme } from "../config/templates";
 import { getLayout } from "../config/layouts";
@@ -55,7 +55,7 @@ export function Processing() {
         setStatus("Creating your video…");
         let video = null;
         try {
-          video = await encodeSlideshow(sources);
+          video = await encodeSlideshowSmart(sources);
         } catch {
           video = null; // print + photo still work without it
         }
