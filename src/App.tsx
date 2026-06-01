@@ -5,6 +5,7 @@ import { ChooseLayout } from "./screens/ChooseLayout";
 import { Capture } from "./screens/Capture";
 import { Processing } from "./screens/Processing";
 import { Result } from "./screens/Result";
+import { Admin } from "./screens/Admin";
 
 function Router() {
   const { screen } = useApp();
@@ -21,6 +22,8 @@ function Router() {
       return <Processing />;
     case "result":
       return <Result />;
+    case "admin":
+      return <Admin />;
   }
 }
 

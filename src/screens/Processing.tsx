@@ -3,7 +3,7 @@ import { renderFrame } from "../lib/compositor";
 import { renderThermal } from "../lib/thermal";
 import { encodeSlideshow } from "../lib/video";
 import { uploadSession } from "../lib/upload";
-import { DEFAULT_THEME } from "../config/templates";
+import { getTheme } from "../config/templates";
 import { getLayout } from "../config/layouts";
 import { useApp } from "../state";
 
@@ -35,16 +35,20 @@ export function Processing() {
 
         const frameCanvas = document.createElement("canvas");
         frameCanvas.width = 1080;
-        renderFrame(frameCanvas, sources, getLayout(layoutId), DEFAULT_THEME, {
-          eventName: settings.eventName,
-          date: settings.date,
-        });
+        renderFrame(
+          frameCanvas,
+          sources,
+          getLayout(layoutId),
+          getTheme(settings.themeId),
+          { eventName: settings.eventName, date: settings.date },
+        );
         const frameUrl = frameCanvas.toDataURL("image/png");
 
         const thermal = renderThermal(
           frameCanvas,
           frameCanvas.width,
           frameCanvas.height,
+          { contrast: settings.thermalContrast },
         );
         const thermalUrl = thermal.canvas.toDataURL("image/png");
 

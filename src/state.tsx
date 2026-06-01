@@ -8,12 +8,13 @@ import {
 } from "react";
 import type { LayoutId, ScreenName } from "./types";
 import type { CapturedPhoto } from "./lib/camera";
+import {
+  loadSettings,
+  saveSettings,
+  type Settings,
+} from "./lib/settings";
 
-export interface Settings {
-  eventName: string;
-  /** Display date string, e.g. "June 1, 2026". */
-  date: string;
-}
+export type { Settings };
 
 /** Where a guest can fetch their photos, for the adaptive QR. */
 export interface ShareInfo {
@@ -46,29 +47,27 @@ interface AppState {
   chooseLayout: (id: LayoutId) => void;
   setPhotos: (photos: CapturedPhoto[]) => void;
   setResult: (result: SessionResult | null) => void;
+  updateSettings: (patch: Partial<Settings>) => void;
   /** Reset the per-guest flow back to the attract screen. */
   reset: () => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
 
-function defaultDate(): string {
-  return new Date().toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export function AppProvider({ children }: { children: ReactNode }) {
   const [screen, setScreen] = useState<ScreenName>("attract");
   const [layoutId, setLayoutId] = useState<LayoutId | null>(null);
   const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
   const [result, setResult] = useState<SessionResult | null>(null);
-  const [settings] = useState<Settings>({
-    eventName: "Our Celebration",
-    date: defaultDate(),
-  });
+  const [settings, setSettings] = useState<Settings>(() => loadSettings());
+
+  const updateSettings = useCallback((patch: Partial<Settings>) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...patch };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
 
   const go = useCallback((s: ScreenName) => setScreen(s), []);
 
@@ -96,9 +95,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       chooseLayout,
       setPhotos,
       setResult,
+      updateSettings,
       reset,
     }),
-    [screen, layoutId, photos, result, settings, go, chooseLayout, reset],
+    [
+      screen,
+      layoutId,
+      photos,
+      result,
+      settings,
+      go,
+      chooseLayout,
+      updateSettings,
+      reset,
+    ],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -55,6 +55,31 @@ export function renderThermal(
   return { canvas, imageData: img };
 }
 
+/** A small test pattern for the admin "Test print" button. */
+export function buildTestImage(label: string, contrast = 1.15): ThermalResult {
+  const w = THERMAL_WIDTH;
+  const h = 220;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+  ctx.font = "700 34px system-ui, sans-serif";
+  ctx.fillText("TEST PRINT", w / 2, 50);
+  ctx.font = "500 22px system-ui, sans-serif";
+  ctx.fillText(label || "Photobooth", w / 2, 88);
+  // Greyscale ramp to judge intensity/contrast.
+  for (let x = 0; x < w; x++) {
+    const v = Math.round((x / w) * 255);
+    ctx.fillStyle = `rgb(${v},${v},${v})`;
+    ctx.fillRect(x, 120, 1, 60);
+  }
+  return renderThermal(canvas, w, h, { contrast });
+}
+
 /** In-place Atkinson dither: snaps to 0/255 and diffuses 1/8 of the error. */
 function atkinson(gray: Float32Array, w: number, h: number): void {
   const at = (x: number, y: number, e: number) => {

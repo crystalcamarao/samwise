@@ -1,6 +1,14 @@
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
-import { mkdir, readFile, writeFile, stat, readdir, rm } from "node:fs/promises";
+import {
+  mkdir,
+  readFile,
+  writeFile,
+  stat,
+  statfs,
+  readdir,
+  rm,
+} from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { networkInterfaces } from "node:os";
 import { extname, join, normalize } from "node:path";
@@ -159,6 +167,36 @@ async function syncPending() {
   return { synced, pending };
 }
 
+async function sessionBytes(id) {
+  const dir = join(DATA, id);
+  let total = 0;
+  try {
+    for (const f of await readdir(dir)) {
+      const info = await stat(join(dir, f));
+      total += info.size;
+    }
+  } catch {
+    /* dir gone */
+  }
+  return total;
+}
+
+async function storageStats() {
+  const ids = await listSessions();
+  let usedBytes = 0;
+  for (const id of ids) usedBytes += await sessionBytes(id);
+  let freeBytes = null;
+  let totalBytes = null;
+  try {
+    const fs = await statfs(DATA);
+    freeBytes = fs.bavail * fs.bsize;
+    totalBytes = fs.blocks * fs.bsize;
+  } catch {
+    /* statfs unsupported */
+  }
+  return { sessions: ids.length, usedBytes, freeBytes, totalBytes };
+}
+
 async function countPending() {
   if (!cloudConfigured()) return 0;
   const ids = await listSessions();
@@ -258,6 +296,37 @@ const server = createServer(async (req, res) => {
       if (!isLoopback(req)) return send(res, 403, "forbidden");
       const result = await syncPending();
       return send(res, 200, JSON.stringify(result), {
+        "Content-Type": "application/json",
+      });
+    }
+    if (path === "/api/storage") {
+      if (!isLoopback(req)) return send(res, 403, "forbidden");
+      return send(res, 200, JSON.stringify(await storageStats()), {
+        "Content-Type": "application/json",
+      });
+    }
+    if (path === "/api/sessions") {
+      if (!isLoopback(req)) return send(res, 403, "forbidden");
+      const ids = await listSessions();
+      const sessions = [];
+      for (const id of ids) {
+        const meta = await readMeta(id);
+        sessions.push({
+          id,
+          createdAt: meta?.createdAt ?? 0,
+          uploaded: Boolean(meta?.uploaded),
+          bytes: await sessionBytes(id),
+        });
+      }
+      return send(res, 200, JSON.stringify({ sessions }), {
+        "Content-Type": "application/json",
+      });
+    }
+    if (path === "/api/purge" && req.method === "POST") {
+      if (!isLoopback(req)) return send(res, 403, "forbidden");
+      const ids = await listSessions();
+      for (const id of ids) await deleteSession(id);
+      return send(res, 200, JSON.stringify({ deleted: ids.length }), {
         "Content-Type": "application/json",
       });
     }

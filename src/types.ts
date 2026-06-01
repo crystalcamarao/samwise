@@ -52,4 +52,5 @@ export type ScreenName =
   | "layout"
   | "capture"
   | "processing"
-  | "result";
+  | "result"
+  | "admin";

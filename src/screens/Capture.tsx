@@ -9,8 +9,9 @@ type Phase = "loading" | "ready" | "countdown" | "flash" | "review" | "error";
 const COUNTDOWN_FROM = 3;
 
 export function Capture() {
-  const { layoutId, go, setPhotos, reset } = useApp();
+  const { layoutId, settings, go, setPhotos, reset } = useApp();
   const layout = layoutId ? getLayout(layoutId) : null;
+  const cameraId = settings.cameraId;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -26,7 +27,7 @@ export function Capture() {
     let cancelled = false;
     (async () => {
       try {
-        const stream = await startCamera();
+        const stream = await startCamera(cameraId ?? undefined);
         if (cancelled) {
           stopStream(stream);
           return;
@@ -47,7 +48,7 @@ export function Capture() {
       stopStream(streamRef.current);
       streamRef.current = null;
     };
-  }, []);
+  }, [cameraId]);
 
   const total = layout?.count ?? 0;
 

@@ -110,6 +110,10 @@ tests/     compositor geometry, layout×template snapshots
 - [x] Step 9: Cloudflare Worker + R2, tablet→cloud background sync + retry
   queue, `/api/status` + `/api/sync`, adaptive online/offline QR (durable cloud
   vs "save now" LAN + secondary durable QR)
-- [ ] Step 10: Admin panel
+- [x] Step 10: Admin panel (hidden long-press + PIN): event name/date/theme/
+  logo, camera select, print intensity + contrast, test print, printer
+  reconnect, cloud status + Sync now, storage used/free + warn threshold +
+  purge-all, config import/export; server `/api/storage` `/api/sessions`
+  `/api/purge`
 - [ ] Step 11: kiosk hardening (auto-start wiring, memory, Web Worker encode)
 - [ ] Step 12: more tests + SessionStart hook

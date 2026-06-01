@@ -103,6 +103,11 @@ body {
 .logo {
   font-size: 5rem;
   color: var(--accent);
+  cursor: pointer;
+}
+.logo-img {
+  max-width: 240px;
+  max-height: 200px;
 }
 .welcome-title {
   font-size: 3rem;
@@ -377,4 +382,115 @@ body {
   max-width: 260px;
   text-align: center;
   margin: 0;
+}
+
+/* Admin panel */
+.admin {
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 16px;
+  overflow-y: auto;
+  text-align: left;
+}
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.admin-head h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+.admin-card {
+  background: var(--surface);
+  border: 1px solid #2c2c36;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.admin-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.admin-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.admin-card input[type="text"],
+.admin-card input:not([type]),
+.admin-card input[type="number"],
+.admin-card select {
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text);
+  background: #14141a;
+  border: 1px solid #34343e;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.admin-card input[type="range"] {
+  width: 100%;
+}
+.field-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.theme-row,
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chip {
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #14141a;
+  color: var(--text);
+  border: 1px solid #34343e;
+  cursor: pointer;
+}
+.chip.on {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn.small {
+  font-size: 1rem;
+  padding: 10px 18px;
+}
+.btn.danger {
+  background: #5a1e2a;
+  color: #ffd7df;
+}
+.kv {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+}
+.muted-msg {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.warn {
+  margin: 0;
+  color: #ffcf6b;
+  font-size: 0.9rem;
 }

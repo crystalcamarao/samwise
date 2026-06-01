@@ -50,7 +50,7 @@ function planShare(share: ShareInfo): {
 }
 
 export function Result() {
-  const { result, reset } = useApp();
+  const { result, settings, reset } = useApp();
   const [primaryQr, setPrimaryQr] = useState<string | null>(null);
   const [secondaryQr, setSecondaryQr] = useState<string | null>(null);
   const [copies, setCopies] = useState(1);
@@ -82,12 +82,16 @@ export function Result() {
     if (!result) return;
     setPrintStatus("printing");
     try {
-      await getPrinter().print({ imageData: result.thermalImage, copies });
+      await getPrinter().print({
+        imageData: result.thermalImage,
+        copies,
+        intensity: settings.printIntensity,
+      });
       setPrintStatus("done");
     } catch {
       setPrintStatus("error");
     }
-  }, [result, copies]);
+  }, [result, copies, settings.printIntensity]);
 
   if (!result) {
     return (
