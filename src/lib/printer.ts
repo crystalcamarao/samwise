@@ -41,6 +41,86 @@ export interface Printer {
 
 const DEFAULT_INTENSITY = 110;
 
+// MXW01 GATT UUIDs (from the library's Web Bluetooth adapter).
+const UUID = {
+  service: "0000ae30-0000-1000-8000-00805f9b34fb",
+  serviceAlt: "0000af30-0000-1000-8000-00805f9b34fb",
+  control: "0000ae01-0000-1000-8000-00805f9b34fb",
+  notify: "0000ae02-0000-1000-8000-00805f9b34fb",
+  data: "0000ae03-0000-1000-8000-00805f9b34fb",
+};
+
+/**
+ * Bluetooth adapter that reconnects to an already-granted printer **without
+ * showing the device picker** (via `navigator.bluetooth.getDevices()`), so the
+ * operator only pairs once. Falls back to the picker the first time. Implements
+ * the library's `BluetoothAdapter` interface structurally.
+ */
+class CachingWebBluetoothAdapter {
+  private device: any = null;
+
+  isAvailable() {
+    return typeof navigator !== "undefined" && "bluetooth" in navigator;
+  }
+
+  async requestDevice() {
+    const bt: any = (navigator as any).bluetooth;
+    // Prefer a remembered device — no picker, works across reloads.
+    if (typeof bt.getDevices === "function") {
+      try {
+        const known: any[] = await bt.getDevices();
+        const match =
+          (this.device && known.find((d) => d.id === this.device.id)) ||
+          (known.length === 1 ? known[0] : null);
+        if (match) {
+          this.device = match;
+          return { id: match.id, name: match.name };
+        }
+      } catch {
+        /* fall through to picker */
+      }
+    }
+    // First pairing (or ambiguous): show the picker (needs a user gesture).
+    this.device = await bt.requestDevice({
+      filters: [{ services: [UUID.service] }, { services: [UUID.serviceAlt] }],
+      optionalServices: [UUID.service, UUID.serviceAlt],
+    });
+    return { id: this.device.id, name: this.device.name };
+  }
+
+  async connect(t: any) {
+    if (!this.device || this.device.id !== t.id) {
+      throw new Error("Device not requested");
+    }
+    const server = await this.device.gatt.connect();
+    let svc: any;
+    try {
+      svc = await server.getPrimaryService(UUID.service);
+    } catch {
+      svc = await server.getPrimaryService(UUID.serviceAlt);
+    }
+    const [control, notify, data] = await Promise.all([
+      svc.getCharacteristic(UUID.control),
+      svc.getCharacteristic(UUID.notify),
+      svc.getCharacteristic(UUID.data),
+    ]);
+    return {
+      device: t,
+      disconnect: async () => {
+        try {
+          if (server.connected) server.disconnect();
+        } catch {
+          /* already gone */
+        }
+      },
+      // Raw GATT characteristics already match the lib's interface.
+      controlCharacteristic: control,
+      dataCharacteristic: data,
+      notifyCharacteristic: notify,
+    };
+  }
+}
+
 class Mxw01Printer implements Printer {
   // Loaded lazily so the browser-only library and the device picker are only
   // touched when we actually connect.
@@ -54,8 +134,8 @@ class Mxw01Printer implements Printer {
   private async ensureClient() {
     if (this.client) return this.client;
     const mod = await import("mxw01-thermal-printer");
-    const adapter = new mod.WebBluetoothAdapter();
-    const client = new mod.ThermalPrinterClient(adapter);
+    const adapter = new CachingWebBluetoothAdapter();
+    const client = new mod.ThermalPrinterClient(adapter as any);
     client.on("disconnected", () => {
       this.state = "disconnected";
     });

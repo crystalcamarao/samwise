@@ -38,14 +38,70 @@ const MINIMAL_THEME: FrameTheme = {
   footer: { text: "{date}", color: "#9a9aa6", size: 28, height: 52 },
 };
 
-/** Selectable frame themes (the full template system extends these). */
-export const THEMES: Record<string, FrameTheme> = {
-  classic: DEFAULT_THEME,
-  party: PARTY_THEME,
-  minimal: MINIMAL_THEME,
+const MONO_THEME: FrameTheme = {
+  id: "mono",
+  name: "Receipt",
+  background: "#ffffff",
+  border: { color: "#111111", width: 8, radius: 4 },
+  gutter: 12,
+  padding: 22,
+  header: { text: "{eventName}", color: "#111111", size: 52, height: 92 },
+  footer: { text: "· {date} ·", color: "#111111", size: 32, height: 60 },
 };
 
-export const THEME_ORDER = ["classic", "party", "minimal"];
+const BOLD_THEME: FrameTheme = {
+  id: "bold",
+  name: "Bold",
+  background: "#ffffff",
+  border: { color: "#111111", width: 40, radius: 8 },
+  gutter: 20,
+  padding: 34,
+  header: { text: "{eventName}", color: "#111111", size: 78, height: 130 },
+  footer: { text: "{date}", color: "#111111", size: 36, height: 66 },
+};
+
+const ELEGANT_THEME: FrameTheme = {
+  id: "elegant",
+  name: "Elegant",
+  background: "#faf7f2",
+  border: { color: "#2a2622", width: 14, radius: 2 },
+  gutter: 18,
+  padding: 40,
+  header: { text: "{eventName}", color: "#2a2622", size: 60, height: 120 },
+  footer: { text: "{date}", color: "#6f675c", size: 30, height: 70 },
+};
+
+const CUTE_THEME: FrameTheme = {
+  id: "cute",
+  name: "Cute",
+  background: "#fff7fb",
+  border: { color: "#ff7eb6", width: 30, radius: 40 },
+  gutter: 18,
+  padding: 30,
+  header: { text: "♡ {eventName} ♡", color: "#e35d97", size: 60, height: 112 },
+  footer: { text: "{date}", color: "#c76b96", size: 32, height: 62 },
+};
+
+/** Selectable frame themes (the full template system extends these). */
+export const THEMES: Record<string, FrameTheme> = {
+  mono: MONO_THEME,
+  classic: DEFAULT_THEME,
+  minimal: MINIMAL_THEME,
+  bold: BOLD_THEME,
+  elegant: ELEGANT_THEME,
+  party: PARTY_THEME,
+  cute: CUTE_THEME,
+};
+
+export const THEME_ORDER = [
+  "mono",
+  "classic",
+  "minimal",
+  "bold",
+  "elegant",
+  "party",
+  "cute",
+];
 
 export function getTheme(id: string): FrameTheme {
   return THEMES[id] ?? DEFAULT_THEME;

@@ -108,79 +108,94 @@ export function Result() {
 
   return (
     <div className="screen result">
-      <div className="result-top">
-        <img className="frame-img" src={result.frameUrl} alt="Your photo frame" />
-      </div>
-
-      <div className="result-cols">
-        <div className="card qr-card">
-          {primaryQr ? (
-            <>
-              <img className="qr" src={primaryQr} alt="Scan to download" />
-              <p className="qr-label">{plan.primary?.label}</p>
-            </>
-          ) : (
-            <div className="qr placeholder-card">
-              <p>{plan.message ?? "Preparing your download…"}</p>
-            </div>
-          )}
-          {secondaryQr && (
-            <div className="qr-secondary">
-              <img className="qr qr-sm" src={secondaryQr} alt="Download later" />
-              <p className="qr-label">{plan.secondary?.label}</p>
-            </div>
-          )}
+      <div className="result-body">
+        <div className="result-top">
+          <img
+            className="frame-img"
+            src={result.frameUrl}
+            alt="Your photo frame"
+          />
         </div>
 
-        <div className="card print-block">
-          <div className="thermal-preview">
-            <span className="thermal-label">Receipt preview</span>
-            <img src={result.thermalUrl} alt="Thermal print preview" />
+        <div className="result-cols">
+          <div className="card qr-card">
+            <span className="card-title">Download</span>
+            {primaryQr ? (
+              <>
+                <img className="qr" src={primaryQr} alt="Scan to download" />
+                <p className="qr-label">{plan.primary?.label}</p>
+              </>
+            ) : (
+              <div className="qr placeholder-card">
+                <p>{plan.message ?? "Preparing your download…"}</p>
+              </div>
+            )}
+            {secondaryQr && (
+              <div className="qr-secondary">
+                <img
+                  className="qr qr-sm"
+                  src={secondaryQr}
+                  alt="Download later"
+                />
+                <p className="qr-label">{plan.secondary?.label}</p>
+              </div>
+            )}
           </div>
 
-          <div className="copies">
-            <span>Copies</span>
-            <div className="stepper">
-              <button
-                className="btn step"
-                disabled={printing || copies <= 1}
-                onClick={() => setCopies((c) => Math.max(1, c - 1))}
-              >
-                −
-              </button>
-              <span className="copies-n">{copies}</span>
-              <button
-                className="btn step"
-                disabled={printing || copies >= 5}
-                onClick={() => setCopies((c) => Math.min(5, c + 1))}
-              >
-                +
-              </button>
+          <div className="card print-block">
+            <span className="card-title">Print</span>
+            <div className="thermal-preview">
+              <img src={result.thermalUrl} alt="Thermal print preview" />
             </div>
-          </div>
 
-          <button
-            className="btn btn-primary"
-            disabled={printing}
-            onClick={doPrint}
-          >
-            {printStatus === "idle" && "Print"}
-            {printStatus === "printing" && "Printing…"}
-            {printStatus === "done" && "Reprint"}
-            {printStatus === "error" && "Retry print"}
-          </button>
-          {printStatus === "error" && (
-            <p className="print-error">
-              Print failed — check paper. Your download is still available.
-            </p>
-          )}
+            <div className="copies">
+              <span>Copies</span>
+              <div className="stepper">
+                <button
+                  className="btn step"
+                  disabled={printing || copies <= 1}
+                  onClick={() => setCopies((c) => Math.max(1, c - 1))}
+                >
+                  −
+                </button>
+                <span className="copies-n">{copies}</span>
+                <button
+                  className="btn step"
+                  disabled={printing || copies >= 5}
+                  onClick={() => setCopies((c) => Math.min(5, c + 1))}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              disabled={printing}
+              onClick={doPrint}
+            >
+              {printStatus === "idle" && "Print"}
+              {printStatus === "printing" && "Printing…"}
+              {printStatus === "done" && "Reprint"}
+              {printStatus === "error" && "Retry print"}
+            </button>
+            {printStatus === "error" && (
+              <p className="print-error">
+                Print failed — check paper. Your download still works.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Done is always clickable, even if a print is still finishing. */}
-      <button className="btn done-btn" onClick={reset}>
-        Done
-      </button>
+      {/* Always-visible footer. Done never depends on printing — printing is
+          optional, and a guest can finish at any time. */}
+      <div className="result-footer">
+        <button className="btn btn-primary done-btn" onClick={reset}>
+          Done
+        </button>
+        <span className="footer-hint">Printing is optional — tap Done to finish</span>
+      </div>
     </div>
   );
 }
