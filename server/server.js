@@ -7,6 +7,13 @@ import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 import { renderDownloadPage } from "./download-page.js";
+import {
+  cloudConfigured,
+  cloudOnline,
+  cloudUrlFor,
+  deleteSessionFromCloud,
+  uploadSessionToCloud,
+} from "./cloud.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 8080;
@@ -106,12 +113,61 @@ async function handleCreateSession(req, res) {
     }),
   );
 
+  // Try the cloud immediately so the durable link is usually live before the
+  // guest leaves; if it fails (dead zone), it stays queued for retry.
+  let uploaded = false;
+  if (cloudConfigured()) {
+    uploaded = await uploadSessionToCloud(DATA, id).catch(() => false);
+    if (uploaded) await markUploaded(id);
+  }
+
   const url = `/s/${id}`;
   const lan = lanAddress();
   const lanUrl = lan ? `http://${lan}:${PORT}${url}` : null;
-  send(res, 200, JSON.stringify({ id, url, lanUrl }), {
-    "Content-Type": "application/json",
-  });
+  send(
+    res,
+    200,
+    JSON.stringify({ id, url, lanUrl, cloudUrl: cloudUrlFor(id), uploaded }),
+    { "Content-Type": "application/json" },
+  );
+}
+
+async function markUploaded(id) {
+  const meta = await readMeta(id);
+  if (!meta) return;
+  meta.uploaded = true;
+  await writeFile(join(DATA, id, "meta.json"), JSON.stringify(meta));
+}
+
+/** Upload every not-yet-synced session. Returns counts for the caller. */
+async function syncPending() {
+  if (!cloudConfigured()) return { synced: 0, pending: 0 };
+  const ids = await listSessions();
+  let synced = 0;
+  let pending = 0;
+  for (const id of ids) {
+    const meta = await readMeta(id);
+    if (!meta || meta.uploaded) continue;
+    const ok = await uploadSessionToCloud(DATA, id).catch(() => false);
+    if (ok) {
+      await markUploaded(id);
+      synced++;
+    } else {
+      pending++;
+    }
+  }
+  return { synced, pending };
+}
+
+async function countPending() {
+  if (!cloudConfigured()) return 0;
+  const ids = await listSessions();
+  let pending = 0;
+  for (const id of ids) {
+    const meta = await readMeta(id);
+    if (meta && !meta.uploaded) pending++;
+  }
+  return pending;
 }
 
 async function readMeta(id) {
@@ -186,6 +242,25 @@ const server = createServer(async (req, res) => {
     if (path === "/api/session" && req.method === "POST") {
       return await handleCreateSession(req, res);
     }
+    if (path === "/api/status") {
+      const [online, pending] = await Promise.all([
+        cloudOnline(),
+        countPending(),
+      ]);
+      return send(
+        res,
+        200,
+        JSON.stringify({ cloudConfigured: cloudConfigured(), online, pending }),
+        { "Content-Type": "application/json" },
+      );
+    }
+    if (path === "/api/sync" && req.method === "POST") {
+      if (!isLoopback(req)) return send(res, 403, "forbidden");
+      const result = await syncPending();
+      return send(res, 200, JSON.stringify(result), {
+        "Content-Type": "application/json",
+      });
+    }
     const dl = /^\/s\/([a-f0-9]{16})$/.exec(path);
     if (dl) return await handleDownloadPage(res, dl[1]);
     const asset = /^\/r\/([a-f0-9]{16})\/([\w.]+)$/.exec(path);
@@ -201,6 +276,13 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Photobooth server on http://localhost:${PORT}`);
   console.log(`Data dir: ${DATA}`);
+  if (cloudConfigured()) {
+    console.log("Cloud sync enabled; retrying pending uploads every 60s.");
+    syncPending().catch(() => {});
+    setInterval(() => syncPending().catch(() => {}), 60_000);
+  } else {
+    console.log("Cloud sync disabled (set CLOUD_BASE + CLOUD_TOKEN to enable).");
+  }
 });
 
 // Exported for the admin/maintenance tooling (manual purge — step 10).
@@ -211,4 +293,5 @@ export async function listSessions() {
 export async function deleteSession(id) {
   if (!/^[a-f0-9]{16}$/.test(id)) return;
   await rm(join(DATA, id), { recursive: true, force: true });
+  await deleteSessionFromCloud(id);
 }

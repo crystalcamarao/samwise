@@ -63,7 +63,11 @@ export function Processing() {
           frameUrl,
           thermalUrl,
           thermalImage: thermal.imageData,
-          shareUrl: uploaded?.lanUrl ?? uploaded?.url ?? null,
+          share: {
+            lanUrl: uploaded?.lanUrl ?? null,
+            cloudUrl: uploaded?.cloudUrl ?? null,
+            uploaded: uploaded?.uploaded ?? false,
+          },
         });
         go("result");
       } catch {

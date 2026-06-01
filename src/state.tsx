@@ -15,6 +15,16 @@ export interface Settings {
   date: string;
 }
 
+/** Where a guest can fetch their photos, for the adaptive QR. */
+export interface ShareInfo {
+  /** Instant on-site download over the booth LAN/hotspot. */
+  lanUrl: string | null;
+  /** Durable cloud URL — works during and after the event. */
+  cloudUrl: string | null;
+  /** Whether the cloud copy is already live. */
+  uploaded: boolean;
+}
+
 /** Everything Processing produces for the Result screen. */
 export interface SessionResult {
   /** Composited color frame as a PNG data URL. */
@@ -23,8 +33,7 @@ export interface SessionResult {
   thermalUrl: string;
   /** Black/white pixels for the printer. */
   thermalImage: ImageData;
-  /** Guest download URL for the QR (LAN now; cloud in step 9), or null. */
-  shareUrl: string | null;
+  share: ShareInfo;
 }
 
 interface AppState {

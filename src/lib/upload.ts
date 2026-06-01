@@ -4,8 +4,12 @@ export interface UploadResult {
   id: string;
   /** Relative path on the local server. */
   url: string;
-  /** Absolute LAN/hotspot URL for the guest QR, when available. */
+  /** Absolute LAN/hotspot URL for instant on-site download, when available. */
   lanUrl: string | null;
+  /** Durable cloud URL (works after the event), or null if cloud is off. */
+  cloudUrl: string | null;
+  /** Whether the cloud copy is already live (immediate upload succeeded). */
+  uploaded: boolean;
 }
 
 function blobToDataUrl(blob: Blob): Promise<string> {

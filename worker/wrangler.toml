@@ -1,0 +1,13 @@
+name = "receipt-photobooth"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Durable cloud store for guest downloads. Create the bucket once with:
+#   wrangler r2 bucket create photobooth
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "photobooth"
+
+# Shared secret the tablet uses to upload. Set it (not committed) with:
+#   wrangler secret put CLOUD_TOKEN
+# and use the same value as CLOUD_TOKEN in the tablet server's environment.

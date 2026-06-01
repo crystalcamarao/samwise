@@ -308,6 +308,19 @@ body {
   max-width: 240px;
   text-align: center;
 }
+.qr-secondary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid #2c2c36;
+}
+.qr.qr-sm {
+  width: 130px;
+  height: 130px;
+}
 
 .print-block {
   display: flex;

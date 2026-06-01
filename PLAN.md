@@ -107,7 +107,9 @@ tests/     compositor geometry, layout×template snapshots
 - [x] Step 7: Result screen (QR + print preview / reprint / copies)
 - [x] Step 8: thermal 1-bit render + Atkinson dithering, **real MXW01 Web
   Bluetooth client** (mock auto-fallback when BLE is unavailable / `pb_printer=mock`)
-- [ ] Step 9: Cloudflare Worker + R2, background sync, adaptive online/offline QR
+- [x] Step 9: Cloudflare Worker + R2, tablet→cloud background sync + retry
+  queue, `/api/status` + `/api/sync`, adaptive online/offline QR (durable cloud
+  vs "save now" LAN + secondary durable QR)
 - [ ] Step 10: Admin panel
 - [ ] Step 11: kiosk hardening (auto-start wiring, memory, Web Worker encode)
 - [ ] Step 12: more tests + SessionStart hook

@@ -1,29 +1,82 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { makeQrDataUrl } from "../lib/qr";
 import { getPrinter } from "../lib/printer";
 import { useApp } from "../state";
+import type { ShareInfo } from "../state";
 
 type PrintStatus = "idle" | "printing" | "done" | "error";
 
+/**
+ * Decide what to show for downloads, given connectivity and sync state:
+ *  - cloud copy live + online → one durable QR (works now and later)
+ *  - otherwise, if we have a LAN URL → "save now" QR for the on-site download,
+ *    plus a secondary durable QR (lights up once the booth syncs)
+ */
+function planShare(share: ShareInfo): {
+  primary?: { url: string; label: string };
+  secondary?: { url: string; label: string };
+  message?: string;
+} {
+  const online = typeof navigator !== "undefined" ? navigator.onLine : true;
+  if (share.uploaded && share.cloudUrl && online) {
+    return {
+      primary: {
+        url: share.cloudUrl,
+        label: "Scan to download — works now and anytime later",
+      },
+    };
+  }
+  if (share.lanUrl) {
+    return {
+      primary: {
+        url: share.lanUrl,
+        label: "On the booth Wi-Fi? Scan to save now",
+      },
+      secondary: share.cloudUrl
+        ? {
+            url: share.cloudUrl,
+            label: "Get it later — online within ~24h",
+          }
+        : undefined,
+    };
+  }
+  if (share.cloudUrl) {
+    return {
+      primary: { url: share.cloudUrl, label: "Scan to download your photos" },
+      message: "Saving online — your link will work shortly.",
+    };
+  }
+  return { message: "Saving… your download link will appear once online." };
+}
+
 export function Result() {
   const { result, reset } = useApp();
-  const [qr, setQr] = useState<string | null>(null);
+  const [primaryQr, setPrimaryQr] = useState<string | null>(null);
+  const [secondaryQr, setSecondaryQr] = useState<string | null>(null);
   const [copies, setCopies] = useState(1);
   const [printStatus, setPrintStatus] = useState<PrintStatus>("idle");
 
-  const shareUrl = result?.shareUrl ?? null;
+  const plan = useMemo(
+    () => (result ? planShare(result.share) : { message: "" }),
+    [result],
+  );
 
   useEffect(() => {
     let active = true;
-    if (shareUrl) {
-      makeQrDataUrl(shareUrl).then((u) => active && setQr(u));
-    } else {
-      setQr(null);
+    setPrimaryQr(null);
+    setSecondaryQr(null);
+    if (plan.primary) {
+      makeQrDataUrl(plan.primary.url).then((u) => active && setPrimaryQr(u));
+    }
+    if (plan.secondary) {
+      makeQrDataUrl(plan.secondary.url, 256).then(
+        (u) => active && setSecondaryQr(u),
+      );
     }
     return () => {
       active = false;
     };
-  }, [shareUrl]);
+  }, [plan]);
 
   const doPrint = useCallback(async () => {
     if (!result) return;
@@ -57,16 +110,20 @@ export function Result() {
 
       <div className="result-actions">
         <div className="qr-card">
-          {qr ? (
+          {primaryQr ? (
             <>
-              <img className="qr" src={qr} alt="Scan to download" />
-              <p className="qr-label">Scan to download your photo &amp; video</p>
+              <img className="qr" src={primaryQr} alt="Scan to download" />
+              <p className="qr-label">{plan.primary?.label}</p>
             </>
           ) : (
             <div className="qr placeholder-card">
-              <p>
-                Saving… your download link will appear once the booth is online.
-              </p>
+              <p>{plan.message ?? "Preparing your download…"}</p>
+            </div>
+          )}
+          {secondaryQr && (
+            <div className="qr-secondary">
+              <img className="qr qr-sm" src={secondaryQr} alt="Download later" />
+              <p className="qr-label">{plan.secondary?.label}</p>
             </div>
           )}
         </div>
