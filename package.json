@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "mp4-muxer": "^5.2.2",
+    "mxw01-thermal-printer": "^0.1.0",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

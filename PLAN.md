@@ -105,8 +105,8 @@ tests/     compositor geometry, layout×template snapshots
 - [x] Step 5: MP4 encoder (WebCodecs → MP4, MediaRecorder → WebM fallback)
 - [x] Step 6: Termux Node server (kiosk-only upload, LAN download page, streaming)
 - [x] Step 7: Result screen (QR + print preview / reprint / copies)
-- [~] Step 8: thermal 1-bit render + Atkinson dithering done; **real MXW01 BLE
-  client still pending** (currently a mock printer)
+- [x] Step 8: thermal 1-bit render + Atkinson dithering, **real MXW01 Web
+  Bluetooth client** (mock auto-fallback when BLE is unavailable / `pb_printer=mock`)
 - [ ] Step 9: Cloudflare Worker + R2, background sync, adaptive online/offline QR
 - [ ] Step 10: Admin panel
 - [ ] Step 11: kiosk hardening (auto-start wiring, memory, Web Worker encode)
