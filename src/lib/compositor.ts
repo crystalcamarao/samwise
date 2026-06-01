@@ -116,6 +116,7 @@ export function renderFrame(
       color: theme.header.color,
       size: theme.header.size,
       weight: 700,
+      family: theme.fontFamily,
     });
   }
   if (geo.footer.h > 0) {
@@ -123,6 +124,7 @@ export function renderFrame(
       color: theme.footer.color,
       size: theme.footer.size,
       weight: 500,
+      family: theme.fontFamily,
     });
   }
 
@@ -157,10 +159,33 @@ function drawCenteredText(
   ctx: CanvasRenderingContext2D,
   text: string,
   rect: Rect,
-  font: { color: string; size: number; weight: number },
+  font: { color: string; size: number; weight: number; family: string },
 ): void {
   ctx.fillStyle = font.color;
-  ctx.font = `${font.weight} ${font.size}px system-ui, sans-serif`;
+  ctx.font = `${font.weight} ${font.size}px ${font.family}`;
   ctx.textBaseline = "middle";
   ctx.fillText(text, rect.x + rect.w / 2, rect.y + rect.h / 2, rect.w);
+}
+
+/** A neutral placeholder "photo" used in theme previews. */
+export function placeholderPhoto(): {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+} {
+  const c = document.createElement("canvas");
+  c.width = 160;
+  c.height = 120;
+  const ctx = c.getContext("2d")!;
+  const g = ctx.createLinearGradient(0, 0, 0, 120);
+  g.addColorStop(0, "#c9c9c9");
+  g.addColorStop(1, "#9a9a9a");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 160, 120);
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.font = "44px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("☺", 80, 62);
+  return { source: c, width: 160, height: 120 };
 }

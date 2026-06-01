@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useApp } from "../state";
 import { THEME_ORDER, THEMES } from "../config/templates";
+import { getLayout } from "../config/layouts";
 import { listCameras } from "../lib/camera";
 import { getPrinter } from "../lib/printer";
-import { buildTestImage } from "../lib/thermal";
+import { buildTestImage, renderReceiptThumbnail } from "../lib/thermal";
 import { DEFAULT_SETTINGS, type Settings } from "../lib/settings";
 import {
   fetchStatus,
@@ -25,7 +26,23 @@ export function Admin() {
   const [storage, setStorage] = useState<StorageStats | null>(null);
   const [printMsg, setPrintMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const importRef = useRef<HTMLInputElement>(null);
+
+  // Render B&W receipt previews for each theme (reflects fonts + layout).
+  useEffect(() => {
+    const vars = { eventName: settings.eventName, date: settings.date };
+    const layout = getLayout(4);
+    const next: Record<string, string> = {};
+    for (const id of THEME_ORDER) {
+      try {
+        next[id] = renderReceiptThumbnail(layout, THEMES[id], vars);
+      } catch {
+        /* ignore */
+      }
+    }
+    setThumbs(next);
+  }, [settings.eventName, settings.date]);
 
   const refresh = useCallback(async () => {
     setStatus(await fetchStatus());
@@ -153,15 +170,20 @@ export function Admin() {
               onChange={(e) => updateSettings({ pin: e.target.value })}
             />
           </label>
-          <div className="field-label">Frame theme</div>
-          <div className="theme-row">
+          <div className="field-label">Receipt theme (preview = what prints)</div>
+          <div className="theme-grid">
             {THEME_ORDER.map((id) => (
               <button
                 key={id}
-                className={`chip ${settings.themeId === id ? "on" : ""}`}
+                className={`theme-opt ${settings.themeId === id ? "on" : ""}`}
                 onClick={() => updateSettings({ themeId: id })}
               >
-                {THEMES[id].name}
+                {thumbs[id] ? (
+                  <img className="theme-thumb" src={thumbs[id]} alt="" />
+                ) : (
+                  <span className="theme-thumb empty" />
+                )}
+                <span className="theme-name">{THEMES[id].name}</span>
               </button>
             ))}
           </div>

@@ -16,6 +16,8 @@ export interface Layout {
 export interface FrameTheme {
   id: string;
   name: string;
+  /** CSS font-family stack for header/footer text. */
+  fontFamily: string;
   /** Solid background color behind the photos. */
   background: string;
   /** Frame border. */

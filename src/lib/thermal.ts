@@ -8,7 +8,7 @@
  * small text unreadable.
  */
 import type { FrameTheme, Layout } from "../types";
-import { renderFrame } from "./compositor";
+import { placeholderPhoto, renderFrame } from "./compositor";
 
 export const THERMAL_WIDTH = 384;
 const REF_WIDTH = 1080; // width the themes are authored against
@@ -147,6 +147,18 @@ export function buildTestImage(label: string, contrast = 1.15): ThermalResult {
     ctx.fillRect(x, 120, 1, 60);
   }
   return renderThermal(canvas, w, h, { contrast });
+}
+
+/** Render a sample B&W receipt for a theme — what the admin picker previews. */
+export function renderReceiptThumbnail(
+  layout: Layout,
+  theme: FrameTheme,
+  vars: { eventName: string; date: string },
+): string {
+  const photos = Array.from({ length: layout.count }, () => placeholderPhoto());
+  return renderThermalFrame(photos, layout, theme, vars).canvas.toDataURL(
+    "image/png",
+  );
 }
 
 /** In-place Atkinson dither: snaps to 0/255 and diffuses 1/8 of the error. */

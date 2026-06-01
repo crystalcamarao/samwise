@@ -8,6 +8,7 @@ import type { FrameTheme } from "../types";
 export const DEFAULT_THEME: FrameTheme = {
   id: "classic",
   name: "Classic",
+  fontFamily: 'system-ui, -apple-system, "Roboto", sans-serif',
   background: "#ffffff",
   border: { color: "#101014", width: 18, radius: 24 },
   gutter: 16,
@@ -19,6 +20,7 @@ export const DEFAULT_THEME: FrameTheme = {
 const PARTY_THEME: FrameTheme = {
   id: "party",
   name: "Party",
+  fontFamily: '"Trebuchet MS", system-ui, sans-serif',
   background: "#fff0f6",
   border: { color: "#ff5aa0", width: 26, radius: 28 },
   gutter: 18,
@@ -30,6 +32,7 @@ const PARTY_THEME: FrameTheme = {
 const MINIMAL_THEME: FrameTheme = {
   id: "minimal",
   name: "Minimal",
+  fontFamily: 'system-ui, "Roboto", sans-serif',
   background: "#ffffff",
   border: { color: "#ffffff", width: 10, radius: 8 },
   gutter: 10,
@@ -41,6 +44,7 @@ const MINIMAL_THEME: FrameTheme = {
 const MONO_THEME: FrameTheme = {
   id: "mono",
   name: "Receipt",
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
   background: "#ffffff",
   border: { color: "#111111", width: 8, radius: 4 },
   gutter: 12,
@@ -52,6 +56,7 @@ const MONO_THEME: FrameTheme = {
 const BOLD_THEME: FrameTheme = {
   id: "bold",
   name: "Bold",
+  fontFamily: '"Arial Black", system-ui, sans-serif',
   background: "#ffffff",
   border: { color: "#111111", width: 40, radius: 8 },
   gutter: 20,
@@ -63,6 +68,7 @@ const BOLD_THEME: FrameTheme = {
 const ELEGANT_THEME: FrameTheme = {
   id: "elegant",
   name: "Elegant",
+  fontFamily: 'Georgia, "Times New Roman", "Noto Serif", serif',
   background: "#faf7f2",
   border: { color: "#2a2622", width: 14, radius: 2 },
   gutter: 18,
@@ -74,6 +80,7 @@ const ELEGANT_THEME: FrameTheme = {
 const CUTE_THEME: FrameTheme = {
   id: "cute",
   name: "Cute",
+  fontFamily: '"Comic Sans MS", "Marker Felt", "Segoe Print", cursive',
   background: "#fff7fb",
   border: { color: "#ff7eb6", width: 30, radius: 40 },
   gutter: 18,
