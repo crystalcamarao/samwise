@@ -39,7 +39,7 @@ export const DEFAULT_SETTINGS: Settings = {
   pin: "1234",
   themeId: "classic",
   printIntensity: 110,
-  thermalContrast: 1.15,
+  thermalContrast: 1.25,
   cameraId: null,
   logoDataUrl: null,
   storageWarnGb: 10,

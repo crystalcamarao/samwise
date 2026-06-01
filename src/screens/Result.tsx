@@ -108,12 +108,12 @@ export function Result() {
 
   return (
     <div className="screen result">
-      <div className="result-preview">
+      <div className="result-top">
         <img className="frame-img" src={result.frameUrl} alt="Your photo frame" />
       </div>
 
-      <div className="result-actions">
-        <div className="qr-card">
+      <div className="result-cols">
+        <div className="card qr-card">
           {primaryQr ? (
             <>
               <img className="qr" src={primaryQr} alt="Scan to download" />
@@ -132,7 +132,7 @@ export function Result() {
           )}
         </div>
 
-        <div className="print-block">
+        <div className="card print-block">
           <div className="thermal-preview">
             <span className="thermal-label">Receipt preview</span>
             <img src={result.thermalUrl} alt="Thermal print preview" />
@@ -171,15 +171,16 @@ export function Result() {
           </button>
           {printStatus === "error" && (
             <p className="print-error">
-              Print failed — check paper. Your download is still available above.
+              Print failed — check paper. Your download is still available.
             </p>
           )}
         </div>
-
-        <button className="btn" disabled={printing} onClick={reset}>
-          Done
-        </button>
       </div>
+
+      {/* Done is always clickable, even if a print is still finishing. */}
+      <button className="btn done-btn" onClick={reset}>
+        Done
+      </button>
     </div>
   );
 }

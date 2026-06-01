@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { renderFrame } from "../lib/compositor";
-import { renderThermal } from "../lib/thermal";
+import { renderThermalFrame } from "../lib/thermal";
 import { encodeSlideshowSmart } from "../lib/video";
 import { uploadSession } from "../lib/upload";
 import { getTheme } from "../config/templates";
@@ -44,10 +44,11 @@ export function Processing() {
         );
         const frameUrl = frameCanvas.toDataURL("image/png");
 
-        const thermal = renderThermal(
-          frameCanvas,
-          frameCanvas.width,
-          frameCanvas.height,
+        const thermal = renderThermalFrame(
+          sources,
+          getLayout(layoutId),
+          getTheme(settings.themeId),
+          { eventName: settings.eventName, date: settings.date },
           { contrast: settings.thermalContrast },
         );
         const thermalUrl = thermal.canvas.toDataURL("image/png");
